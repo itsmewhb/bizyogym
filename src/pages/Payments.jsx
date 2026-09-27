@@ -152,6 +152,17 @@ function Payments() {
     return Math.max(Number(member.membershipCycle || 1), 1);
   };
 
+  const isMembershipExpired = (member) => {
+    if (!member?.membershipExpirationDate) return false;
+
+    const expirationDate = new Date(
+      `${member.membershipExpirationDate}T23:59:59`,
+    );
+
+    return !Number.isNaN(expirationDate.getTime()) &&
+      new Date() > expirationDate;
+  };
+
   /*
    * Get membership price
    */
@@ -198,10 +209,10 @@ function Payments() {
     const membershipPrice = getMembershipPrice(member);
     const isFullyPaid = membershipPrice > 0 && totalPaid >= membershipPrice;
 
-    // Do not let an old payment cycle overwrite the current membership cycle.
+    // Do not let an older payment cycle overwrite the current membership cycle.
     if (
       member.membershipCycle &&
-      Number(member.membershipCycle) !== Number(cycleNumber)
+      Number(cycleNumber) < Number(member.membershipCycle)
     ) {
       return;
     }
@@ -240,7 +251,8 @@ function Payments() {
   };
 
   /*
-   * Get payment status
+   * Get payment status.
+   * A membership requires one full payment equal to the plan price.
    */
   const getPaymentStatus = (memberId) => {
     const member = members.find(
@@ -258,31 +270,18 @@ function Payments() {
 
     const price = getMembershipPrice(member);
     const cycleNumber = getCurrentCycleNumber(member);
-
     const paid = getMemberTotalPaid(
       memberId,
       null,
       cycleNumber,
     );
-
-    const remaining = Math.max(
-      price - paid,
-      0,
-    );
-
-    let status = "No Payment";
-
-    if (price > 0 && paid >= price) {
-      status = "Fully Paid";
-    } else if (paid > 0) {
-      status = "Partially Paid";
-    }
+    const remaining = Math.max(price - paid, 0);
 
     return {
       price,
       paid,
       remaining,
-      status,
+      status: paid === price && price > 0 ? "Fully Paid" : "No Payment",
     };
   };
 
@@ -300,6 +299,9 @@ function Payments() {
       setFormData((previous) => ({
         ...previous,
         memberId: value,
+        amount: selectedMember
+          ? String(getMembershipPrice(selectedMember))
+          : "",
         membership:
           selectedMember?.membershipName || "",
       }));
@@ -339,9 +341,15 @@ function Payments() {
   const handleEditClick = (payment) => {
     setEditingPayment(payment);
 
+    const paymentMember = members.find(
+      (member) => member.id === payment.memberId,
+    );
+
     setFormData({
       memberId: payment.memberId || "",
-      amount: payment.amount || "",
+      amount: paymentMember
+        ? String(getMembershipPrice(paymentMember))
+        : String(payment.amount || ""),
       paymentDate: payment.paymentDate || "",
       paymentMethod:
         payment.paymentMethod || "Cash",
@@ -363,16 +371,6 @@ function Payments() {
       return;
     }
 
-    if (
-      !formData.amount ||
-      Number(formData.amount) <= 0
-    ) {
-      alert(
-        "Please enter a valid payment amount.",
-      );
-      return;
-    }
-
     try {
       const selectedMember =
         getSelectedMember();
@@ -384,64 +382,62 @@ function Payments() {
         return;
       }
 
-      const cycleNumber = getCurrentCycleNumber(selectedMember);
+      const membershipPrice = getMembershipPrice(selectedMember);
+
+      if (membershipPrice <= 0) {
+        alert("This member does not have a valid membership plan price.");
+        return;
+      }
+
+      const existingStatus = getPaymentStatus(selectedMember.id);
+
+      if (existingStatus.status === "Fully Paid" && !isMembershipExpired(selectedMember)) {
+        alert("This member already has a fully paid active membership.");
+        return;
+      }
+
+      // Expired memberships start a new payment cycle.
+      const cycleNumber = isMembershipExpired(selectedMember)
+        ? getCurrentCycleNumber(selectedMember) + 1
+        : getCurrentCycleNumber(selectedMember);
+
+      const exactAmount = membershipPrice;
 
       const newPaymentRef = await addDoc(
         collection(db, "payments"),
         {
           memberId: selectedMember.id,
           memberName: selectedMember.name,
-          amount: Number(formData.amount),
-          paymentType: selectedMember.membershipStartDate ? "Additional" : "Initial",
+          amount: exactAmount,
+          paymentType: cycleNumber > 1 ? "Renewal" : "Initial",
           cycleNumber,
           paymentDate:
             formData.paymentDate,
           paymentMethod:
             formData.paymentMethod,
           membership:
-            formData.membership ||
             selectedMember.membershipName ||
             "",
+          membershipPrice: Number(selectedMember.membershipPrice || 0),
+          membershipDuration: Number(selectedMember.membershipDuration || 0),
+          membershipId: selectedMember.membershipId || null,
           notes: formData.notes.trim(),
           createdAt: serverTimestamp(),
         },
       );
 
-      const newTotalPaid =
-        getMemberTotalPaid(
-          selectedMember.id,
-          null,
-          cycleNumber,
-        ) + Number(formData.amount);
-
-      const membershipPrice =
-        getMembershipPrice(
-          selectedMember,
-        );
-
       await syncMemberMembership(
         selectedMember,
-        newTotalPaid,
+        membershipPrice,
         formData.paymentDate,
         cycleNumber,
       );
 
-      let paymentStatus = "No Payment";
-
-      if (
-        membershipPrice > 0 &&
-        newTotalPaid >= membershipPrice
-      ) {
-        paymentStatus = "Fully Paid";
-      } else if (newTotalPaid > 0) {
-        paymentStatus = "Partially Paid";
-      }
+      const paymentStatus = "Fully Paid";
 
       await logActivity({
         action: "Payment Added",
-        description: `Added payment of ₱${Number(
-          formData.amount,
-        ).toLocaleString()} for ${
+        description: `Added payment of ₱${membershipPrice.toLocaleString()} for ${
           selectedMember.name
         } - ${paymentStatus}`,
         targetType: "payment",
@@ -472,16 +468,6 @@ function Payments() {
       return;
     }
 
-    if (
-      !formData.amount ||
-      Number(formData.amount) <= 0
-    ) {
-      alert(
-        "Please enter a valid payment amount.",
-      );
-      return;
-    }
-
     try {
       const selectedMember =
         getSelectedMember();
@@ -493,47 +479,36 @@ function Payments() {
         return;
       }
 
+      // Preserve the historical amount/plan for old payment records.
+      // If the record is from the current plan, use the member's current price.
+      const historicalPrice = Number(editingPayment.membershipPrice || 0);
+      const membershipPrice = historicalPrice > 0
+        ? historicalPrice
+        : getMembershipPrice(selectedMember);
+
+      if (membershipPrice <= 0) {
+        alert("This payment does not have a valid membership plan price.");
+        return;
+      }
+
       /*
-       * Calculate the total excluding
-       * the payment currently being edited.
+       * Every payment is exactly one full membership price.
        */
       const cycleNumber = Number(
         editingPayment.cycleNumber || getCurrentCycleNumber(selectedMember),
       );
 
-      const previousPaymentsTotal =
-        getMemberTotalPaid(
-          selectedMember.id,
-          editingPayment.id,
+      // Only resync the member if this payment belongs to the current cycle.
+      if (cycleNumber === getCurrentCycleNumber(selectedMember)) {
+        await syncMemberMembership(
+          selectedMember,
+          getMembershipPrice(selectedMember),
+          formData.paymentDate,
           cycleNumber,
         );
-
-      const newTotalPaid =
-        previousPaymentsTotal +
-        Number(formData.amount);
-
-      const membershipPrice =
-        getMembershipPrice(
-          selectedMember,
-        );
-
-      await syncMemberMembership(
-        selectedMember,
-        newTotalPaid,
-        formData.paymentDate,
-        cycleNumber,
-      );
-
-      let paymentStatus = "No Payment";
-
-      if (
-        membershipPrice > 0 &&
-        newTotalPaid >= membershipPrice
-      ) {
-        paymentStatus = "Fully Paid";
-      } else if (newTotalPaid > 0) {
-        paymentStatus = "Partially Paid";
       }
+
+      const paymentStatus = "Fully Paid";
 
       const paymentRef = doc(
         db,
@@ -544,7 +519,7 @@ function Payments() {
       await updateDoc(paymentRef, {
         memberId: selectedMember.id,
         memberName: selectedMember.name,
-        amount: Number(formData.amount),
+        amount: membershipPrice,
         paymentType: editingPayment.paymentType || "Initial",
         cycleNumber,
         paymentDate:
@@ -552,9 +527,13 @@ function Payments() {
         paymentMethod:
           formData.paymentMethod,
         membership:
+          editingPayment.membership ||
           formData.membership ||
           selectedMember.membershipName ||
           "",
+        membershipPrice: Number(editingPayment.membershipPrice || membershipPrice),
+        membershipDuration: Number(editingPayment.membershipDuration || selectedMember.membershipDuration || 0),
+        membershipId: editingPayment.membershipId || selectedMember.membershipId || null,
         notes: formData.notes.trim(),
       });
 
@@ -708,45 +687,38 @@ function Payments() {
       return "fully-paid";
     }
 
-    if (status === "Partially Paid") {
-      return "partially-paid";
-    }
-
     return "no-payment";
   };
 
   /*
-   * Filter Payments
+   * Members who need a payment
+   *
+   * Only show:
+   * - Members who have not paid their current plan
+   * - Members whose membership has expired and needs renewal
+   *
+   * Fully paid active members are hidden from the payment list.
    */
-  const filteredPayments = payments.filter(
-    (payment) => {
-      const searchText =
-        search.toLowerCase();
+  const paymentMembers = members.filter((member) => {
+    const paymentInfo = getPaymentStatus(member.id);
+    const expired = isMembershipExpired(member);
 
-      const paymentStatus =
-        getPaymentStatus(
-          payment.memberId,
-        ).status;
+    return expired || paymentInfo.status !== "Fully Paid";
+  });
 
-      return (
-        (payment.memberName || "")
-          .toLowerCase()
-          .includes(searchText) ||
-        (payment.paymentMethod || "")
-          .toLowerCase()
-          .includes(searchText) ||
-        (payment.membership || "")
-          .toLowerCase()
-          .includes(searchText) ||
-        (payment.notes || "")
-          .toLowerCase()
-          .includes(searchText) ||
-        paymentStatus
-          .toLowerCase()
-          .includes(searchText)
-      );
-    },
-  );
+  const filteredPaymentMembers = paymentMembers.filter((member) => {
+    const searchText = search.toLowerCase();
+    const paymentInfo = getPaymentStatus(member.id);
+    const expired = isMembershipExpired(member);
+    const paymentType = expired ? "renewal" : "unpaid";
+
+    return (
+      (member.name || "").toLowerCase().includes(searchText) ||
+      (member.membershipName || "").toLowerCase().includes(searchText) ||
+      paymentInfo.status.toLowerCase().includes(searchText) ||
+      paymentType.includes(searchText)
+    );
+  });
 
   /*
    * Calculate Total Revenue
@@ -767,20 +739,6 @@ function Payments() {
 
       return (
         paymentInfo.status === "Fully Paid"
-      );
-    }).length;
-
-  /*
-   * Count Partially Paid Members
-   */
-  const partiallyPaidMembers =
-    members.filter((member) => {
-      const paymentInfo =
-        getPaymentStatus(member.id);
-
-      return (
-        paymentInfo.status ===
-        "Partially Paid"
       );
     }).length;
 
@@ -832,10 +790,10 @@ function Payments() {
         </div>
 
         <div className="payment-summary-card">
-          <span>Partially Paid Members</span>
+          <span>Unpaid Members</span>
 
           <strong className="payment-status-partial">
-            {partiallyPaidMembers}
+            {members.length - fullyPaidMembers}
           </strong>
         </div>
       </div>
@@ -844,11 +802,10 @@ function Payments() {
       <div className="payments-card">
         <div className="payments-card-header">
           <div>
-            <h2>Payment Records</h2>
+            <h2>Members Needing Payment</h2>
 
             <p>
-              View and manage payment
-              transactions.
+              Only unpaid members and members who need renewal are shown.
             </p>
           </div>
 
@@ -866,10 +823,10 @@ function Payments() {
           <p className="payment-message">
             Loading payments...
           </p>
-        ) : filteredPayments.length ===
+        ) : filteredPaymentMembers.length ===
           0 ? (
           <p className="payment-message">
-            No payment records found.
+            No members need payment right now.
           </p>
         ) : (
           <div className="payments-table-container">
@@ -882,31 +839,31 @@ function Payments() {
                   <th>Total Paid</th>
                   <th>Remaining</th>
                   <th>Payment Status</th>
-                  <th>Payment Date</th>
-                  <th>Method</th>
+                  <th>Payment Needed</th>
+                  <th>Type</th>
                   <th>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
-                {filteredPayments.map(
-                  (payment) => {
+                {filteredPaymentMembers.map(
+                  (member) => {
                     const paymentInfo =
-                      getPaymentStatus(
-                        payment.memberId,
-                      );
+                      getPaymentStatus(member.id);
+                    const expired =
+                      isMembershipExpired(member);
 
                     return (
-                      <tr key={payment.id}>
+                      <tr key={member.id}>
                         <td>
                           <strong>
-                            {payment.memberName ||
+                            {member.name ||
                               "Unknown Member"}
                           </strong>
                         </td>
 
                         <td>
-                          {payment.membership ||
+                          {member.membershipName ||
                             "-"}
                         </td>
 
@@ -945,50 +902,126 @@ function Payments() {
                               paymentInfo.status,
                             )}`}
                           >
-                            {paymentInfo.status}
+                            {expired
+                              ? "Needs Renewal"
+                              : paymentInfo.status}
                           </span>
                         </td>
 
                         <td>
-                          {formatDate(
-                            payment.paymentDate,
-                          )}
+                          {expired
+                            ? "Needs Renewal"
+                            : "New Membership"}
                         </td>
 
                         <td>
-                          <span className="payment-method">
-                            {payment.paymentMethod ||
-                              "-"}
+                          <span className={`payment-method ${
+                            expired
+                              ? "renewal-label"
+                              : "unpaid-label"
+                          }`}>
+                            {expired
+                              ? "Renewal"
+                              : "Unpaid"}
                           </span>
                         </td>
 
                         <td>
                           <button
                             className="edit-payment-btn"
-                            onClick={() =>
-                              handleEditClick(
-                                payment,
-                              )
-                            }
+                            onClick={() => {
+                              setEditingPayment(null);
+                              setFormData({
+                                memberId: member.id,
+                                amount: String(
+                                  getMembershipPrice(member),
+                                ),
+                                paymentDate: new Date()
+                                  .toISOString()
+                                  .split("T")[0],
+                                paymentMethod: "Cash",
+                                membership:
+                                  member.membershipName || "",
+                                notes: "",
+                              });
+                              setShowModal(true);
+                            }}
                           >
-                            Edit
-                          </button>
-
-                          <button
-                            className="delete-payment-btn"
-                            onClick={() =>
-                              handleDeletePayment(
-                                payment,
-                              )
-                            }
-                          >
-                            Delete
+                            {expired ? "Renew" : "Pay"}
                           </button>
                         </td>
                       </tr>
                     );
                   },
                 )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* PAYMENT HISTORY */}
+      <div className="payments-card payment-history-card">
+        <div className="payments-card-header">
+          <div>
+            <h2>Payment History</h2>
+            <p>View all recorded payment transactions, including previous memberships and renewals.</p>
+          </div>
+        </div>
+
+        {loading ? (
+          <p className="payment-message">Loading payment history...</p>
+        ) : payments.filter((payment) => {
+          const searchText = search.toLowerCase();
+          return (
+            (payment.memberName || "").toLowerCase().includes(searchText) ||
+            (payment.membership || "").toLowerCase().includes(searchText) ||
+            (payment.paymentMethod || "").toLowerCase().includes(searchText) ||
+            String(payment.amount || "").includes(searchText)
+          );
+        }).length === 0 ? (
+          <p className="payment-message">No payment history found.</p>
+        ) : (
+          <div className="payments-table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Membership</th>
+                  <th>Amount</th>
+                  <th>Payment Date</th>
+                  <th>Method</th>
+                  <th>Type</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {payments.filter((payment) => {
+                  const searchText = search.toLowerCase();
+                  return (
+                    (payment.memberName || "").toLowerCase().includes(searchText) ||
+                    (payment.membership || "").toLowerCase().includes(searchText) ||
+                    (payment.paymentMethod || "").toLowerCase().includes(searchText) ||
+                    String(payment.amount || "").includes(searchText)
+                  );
+                }).map((payment) => (
+                  <tr key={payment.id}>
+                    <td><strong>{payment.memberName || "Unknown Member"}</strong></td>
+                    <td>{payment.membership || "-"}</td>
+                    <td><span className="payment-amount">{formatAmount(payment.amount)}</span></td>
+                    <td>{formatDate(payment.paymentDate)}</td>
+                    <td><span className="payment-method">{payment.paymentMethod || "-"}</span></td>
+                    <td>
+                      <span className="payment-status fully-paid">
+                        {payment.paymentType || (Number(payment.cycleNumber || 1) > 1 ? "Renewal" : "Initial")}
+                      </span>
+                    </td>
+                    <td>
+                      <button className="edit-payment-btn" onClick={() => handleEditClick(payment)}>Edit</button>
+                      <button className="delete-payment-btn" onClick={() => handleDeletePayment(payment)}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -1044,7 +1077,7 @@ function Payments() {
                   value={formData.memberId}
                   onChange={handleChange}
                   required
-                  disabled={membersLoading}
+                  disabled={membersLoading || Boolean(editingPayment)}
                 >
                   <option value="">
                     {membersLoading
@@ -1052,7 +1085,7 @@ function Payments() {
                       : "Select a member"}
                   </option>
 
-                  {members.map((member) => (
+                  {paymentMembers.map((member) => (
                     <option
                       key={member.id}
                       value={member.id}
@@ -1157,20 +1190,22 @@ function Payments() {
                 </div>
               )}
 
-              {/* Amount */}
+              {/* Fixed Plan Amount */}
               <div className="form-group">
-                <label>Amount</label>
+                <label>Amount to Pay (Fixed)</label>
 
                 <input
                   type="number"
                   name="amount"
                   value={formData.amount}
-                  onChange={handleChange}
-                  placeholder="Enter payment amount"
-                  min="1"
-                  step="0.01"
+                  readOnly
+                  placeholder="Select a member first"
                   required
                 />
+
+                <small>
+                  The payment amount is fixed to the selected membership plan price.
+                </small>
               </div>
 
               {/* Payment Date */}
@@ -1222,21 +1257,17 @@ function Payments() {
                 </select>
               </div>
 
-              {/* Membership */}
+              {/* Fixed Membership Plan */}
               <div className="form-group">
-                <label>
-                  Membership
-                </label>
-
+                <label>Membership Plan (Fixed)</label>
                 <input
                   type="text"
-                  name="membership"
-                  value={
-                    formData.membership
-                  }
-                  onChange={handleChange}
-                  placeholder="Membership plan"
+                  value={formData.membership || "Select a member first"}
+                  readOnly
                 />
+                <small>
+                  The member's assigned plan cannot be changed from Payments. Use Change Plan from Members.
+                </small>
               </div>
 
               {/* Notes */}

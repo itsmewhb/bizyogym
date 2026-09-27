@@ -68,10 +68,10 @@
   color: #00c26f !important;
 }
 
-.payment-status-partial {
-  color: #ff8c00 !important;
+.payment-status.needs-renewal {
+  background: rgba(255, 140, 0, 0.15);
+  color: #ff8c00;
 }
-
 /* PAYMENT CARD */
 
 .payments-card {
@@ -79,6 +79,7 @@
   border: 1px solid #303044;
   border-radius: 12px;
   padding: 25px;
+  margin-top: 30px;
 }
 
 .payments-card-header {
