@@ -500,17 +500,16 @@ function Members() {
 
                     <td>
                       <span
-                        className={`member-status ${
-                          getMemberStatus(member) === "Restricted"
+                        className={`member-status ${getMemberStatus(member) === "Restricted"
                             ? "restricted"
                             : getMemberStatus(member) === "Unpaid"
                               ? "unpaid"
                               : getMemberStatus(member) === "Expired"
                                 ? "expired"
-                              : getMemberStatus(member) === "Active"
-                                ? "active"
-                                : "inactive"
-                        }`}
+                                : getMemberStatus(member) === "Active"
+                                  ? "active"
+                                  : "inactive"
+                          }`}
                       >
                         {getMemberStatus(member)}
                       </span>
@@ -536,7 +535,7 @@ function Members() {
                         </button>
                       )}
 
-                      
+
 
                       {getMemberStatus(member) === "Expired" && (
                         <button
@@ -647,13 +646,35 @@ function Members() {
                   type="text"
                   name="phone"
                   value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="Enter 11-digit phone number"
+                  onChange={(e) => {
+                    const value = e.target.value;
+
+                    // Allow numbers only
+                    if (!/^\d*$/.test(value)) {
+                      return;
+                    }
+
+                    // Maximum of 11 digits
+                    if (value.length > 11) {
+                      return;
+                    }
+
+                    setFormData({
+                      ...formData,
+                      phone: value,
+                    });
+                  }}
+                  placeholder="09XXXXXXXXX"
                   inputMode="numeric"
-                  pattern="[0-9]{11}"
-                  maxLength="11"
+                  pattern="09[0-9]{9}"
+                  maxLength={11}
+                  minLength={11}
                   required
                 />
+
+                <small style={{ color: "#666" }}>
+                  Must be 11 digits and start with 09.
+                </small>
               </div>
 
               {/* MEMBERSHIP PLAN */}

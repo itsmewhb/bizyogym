@@ -47,27 +47,32 @@ function Memberships() {
   }, []);
 
   const handleChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  if (name === "memberId") {
-    const member = members.find(
-      (member) => member.id === value
-    );
+    if (name === "price") {
+      // Numbers only
+      if (!/^\d*$/.test(value)) {
+        return;
+      }
+
+      // Maximum 7 digits
+      if (value.length > 7) {
+        return;
+      }
+    }
+
+    if (name === "duration") {
+      // Numbers only
+      if (!/^\d*$/.test(value)) {
+        return;
+      }
+    }
 
     setFormData((prev) => ({
       ...prev,
-      memberId: value,
-      amount: member?.membershipPrice || "",
+      [name]: value,
     }));
-
-    return;
-  }
-
-  setFormData((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
+  };
 
   const resetForm = () => {
     setFormData({
@@ -274,12 +279,13 @@ function Memberships() {
                 <label>Price (₱)</label>
 
                 <input
-                  type="number"
+                  type="text"
                   name="price"
                   placeholder="Example: 1500"
                   value={formData.price}
                   onChange={handleChange}
-                  min="0"
+                  inputMode="numeric"
+                  maxLength={7}
                   required
                 />
               </div>
