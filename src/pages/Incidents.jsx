@@ -11,9 +11,12 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { useAuth } from "../context/AuthContext";
 import "./Incidents.css";
 
 function Incidents() {
+  const { isAdmin } = useAuth();
+
   const [incidents, setIncidents] = useState([]);
   const [members, setMembers] = useState([]);
 
@@ -124,6 +127,7 @@ function Incidents() {
 
   /* =========================
      OPEN ADD MODAL
+     ADMIN + STAFF
   ========================= */
 
   const handleAddIncident = () => {
@@ -145,6 +149,7 @@ function Incidents() {
 
   /* =========================
      OPEN EDIT MODAL
+     ADMIN + STAFF
   ========================= */
 
   const handleEditIncident = (incident) => {
@@ -166,6 +171,7 @@ function Incidents() {
 
   /* =========================
      SAVE INCIDENT
+     ADMIN + STAFF
   ========================= */
 
   const handleSubmit = async (event) => {
@@ -220,9 +226,12 @@ function Incidents() {
 
   /* =========================
      DELETE INCIDENT
+     ADMIN ONLY
   ========================= */
 
   const handleDeleteIncident = async (id) => {
+    if (!isAdmin) return;
+
     const confirmed = window.confirm(
       "Are you sure you want to delete this incident?",
     );
@@ -263,6 +272,7 @@ function Incidents() {
           <p>Manage and monitor gym-related incidents.</p>
         </div>
 
+        {/* Admin + Staff */}
         <button
           className="add-incident-btn"
           onClick={handleAddIncident}
@@ -355,6 +365,7 @@ function Incidents() {
                     </td>
 
                     <td>
+                      {/* Admin + Staff can edit */}
                       <button
                         className="edit-btn"
                         onClick={() =>
@@ -364,14 +375,17 @@ function Incidents() {
                         Edit
                       </button>
 
-                      <button
-                        className="delete-btn"
-                        onClick={() =>
-                          handleDeleteIncident(incident.id)
-                        }
-                      >
-                        Delete
-                      </button>
+                      {/* Admin only */}
+                      {isAdmin && (
+                        <button
+                          className="delete-btn"
+                          onClick={() =>
+                            handleDeleteIncident(incident.id)
+                          }
+                        >
+                          Delete
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))

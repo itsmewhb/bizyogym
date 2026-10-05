@@ -157,10 +157,17 @@ function Members() {
     const unsubscribe = onSnapshot(
       collection(db, "members"),
       (snapshot) => {
-        const membersData = snapshot.docs.map((memberDoc) => ({
-          id: memberDoc.id,
-          ...memberDoc.data(),
-        }));
+        const membersData = snapshot.docs
+          .map((memberDoc) => ({
+            id: memberDoc.id,
+            ...memberDoc.data(),
+          }))
+          .sort((a, b) => {
+            const dateA = a.createdAt?.toMillis?.() || 0;
+            const dateB = b.createdAt?.toMillis?.() || 0;
+
+            return dateB - dateA;
+          });
 
         setMembers(membersData);
         setLoading(false);
@@ -173,7 +180,7 @@ function Members() {
 
     return () => unsubscribe();
   }, []);
-
+  
   // =========================================================
   // DELETE MEMBER
   // =========================================================
@@ -501,14 +508,14 @@ function Members() {
                     <td>
                       <span
                         className={`member-status ${getMemberStatus(member) === "Restricted"
-                            ? "restricted"
-                            : getMemberStatus(member) === "Unpaid"
-                              ? "unpaid"
-                              : getMemberStatus(member) === "Expired"
-                                ? "expired"
-                                : getMemberStatus(member) === "Active"
-                                  ? "active"
-                                  : "inactive"
+                          ? "restricted"
+                          : getMemberStatus(member) === "Unpaid"
+                            ? "unpaid"
+                            : getMemberStatus(member) === "Expired"
+                              ? "expired"
+                              : getMemberStatus(member) === "Active"
+                                ? "active"
+                                : "inactive"
                           }`}
                       >
                         {getMemberStatus(member)}

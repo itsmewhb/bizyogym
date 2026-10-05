@@ -230,3 +230,22 @@ tbody tr:hover {
     white-space: nowrap;
   }
 }
+.current-date-time {
+  text-align: right;
+  padding: 12px 18px;
+  background: #1e1e2d;
+  border-radius: 10px;
+  min-width: 220px;
+}
+
+.current-date {
+  color: #aaa;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.current-time {
+  color: #ff8c00;
+  font-size: 22px;
+  font-weight: 600;
+}

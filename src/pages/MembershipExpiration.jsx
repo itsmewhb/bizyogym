@@ -8,9 +8,12 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { sendMembershipExpirationEmail } from "../utils/emailService";
+import { useAuth } from "../context/AuthContext";
 import "./MembershipExpiration.css";
 
 function MembershipExpiration() {
+  const { isAdmin, userProfile } = useAuth();
+
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sendingEmail, setSendingEmail] = useState(null);
@@ -152,10 +155,23 @@ function MembershipExpiration() {
 
   /*
    * Send expiration reminder
+   * Admin and Staff are both allowed
    */
   const handleSendReminder = async (
     member,
   ) => {
+    // Only Admin and Staff can send reminders
+    if (
+      !isAdmin &&
+      userProfile?.role !== "staff"
+    ) {
+      alert(
+        "You do not have permission to send expiration reminders.",
+      );
+
+      return;
+    }
+
     if (!member.email) {
       alert(
         "This member does not have an email address.",

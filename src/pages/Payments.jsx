@@ -9,10 +9,13 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { useAuth } from "../context/AuthContext";
 import { logActivity } from "../utils/activityLogger";
 import "./Payments.css";
 
 function Payments() {
+  const { isAdmin } = useAuth();
+
   const [payments, setPayments] = useState([]);
   const [members, setMembers] = useState([]);
 
@@ -222,7 +225,7 @@ function Payments() {
     if (isFullyPaid) {
       const startDate =
         member.membershipStartDate &&
-        Number(member.membershipCycle || 1) === Number(cycleNumber)
+          Number(member.membershipCycle || 1) === Number(cycleNumber)
           ? member.membershipStartDate
           : paymentDate || new Date().toISOString().split("T")[0];
 
@@ -339,6 +342,7 @@ function Payments() {
    * Open Edit Payment Modal
    */
   const handleEditClick = (payment) => {
+    if (!isAdmin) return;
     setEditingPayment(payment);
 
     const paymentMember = members.find(
@@ -437,9 +441,8 @@ function Payments() {
 
       await logActivity({
         action: "Payment Added",
-        description: `Added payment of ₱${membershipPrice.toLocaleString()} for ${
-          selectedMember.name
-        } - ${paymentStatus}`,
+        description: `Added payment of ₱${membershipPrice.toLocaleString()} for ${selectedMember.name
+          } - ${paymentStatus}`,
         targetType: "payment",
         targetId: newPaymentRef.id,
       });
@@ -462,6 +465,8 @@ function Payments() {
    */
   const handleUpdatePayment = async (e) => {
     e.preventDefault();
+
+    if (!isAdmin) return;
 
     if (!formData.memberId) {
       alert("Please select a member.");
@@ -539,9 +544,8 @@ function Payments() {
 
       await logActivity({
         action: "Payment Updated",
-        description: `Updated payment for ${
-          selectedMember.name
-        } - ${paymentStatus}`,
+        description: `Updated payment for ${selectedMember.name
+          } - ${paymentStatus}`,
         targetType: "payment",
         targetId: editingPayment.id,
       });
@@ -564,9 +568,9 @@ function Payments() {
   /*
    * Delete Payment
    */
-  const handleDeletePayment = async (
-    payment,
-  ) => {
+  const handleDeletePayment = async (payment) => {
+    if (!isAdmin) return;
+
     const confirmDelete = window.confirm(
       `Are you sure you want to delete this payment from ${payment.memberName}?`,
     );
@@ -605,10 +609,9 @@ function Payments() {
         action: "Payment Deleted",
         description: `Deleted payment of ₱${Number(
           payment.amount || 0,
-        ).toLocaleString()} for ${
-          payment.memberName ||
-          "Unknown Member"
-        }`,
+        ).toLocaleString()} for ${payment.memberName ||
+        "Unknown Member"
+          }`,
         targetType: "payment",
         targetId: payment.id,
       });
@@ -885,7 +888,7 @@ function Payments() {
                           <span
                             className={
                               paymentInfo.remaining >
-                              0
+                                0
                                 ? "payment-remaining"
                                 : "payment-zero"
                             }
@@ -915,11 +918,10 @@ function Payments() {
                         </td>
 
                         <td>
-                          <span className={`payment-method ${
-                            expired
-                              ? "renewal-label"
-                              : "unpaid-label"
-                          }`}>
+                          <span className={`payment-method ${expired
+                            ? "renewal-label"
+                            : "unpaid-label"
+                            }`}>
                             {expired
                               ? "Renewal"
                               : "Unpaid"}
@@ -1017,8 +1019,23 @@ function Payments() {
                       </span>
                     </td>
                     <td>
-                      <button className="edit-payment-btn" onClick={() => handleEditClick(payment)}>Edit</button>
-                      <button className="delete-payment-btn" onClick={() => handleDeletePayment(payment)}>Delete</button>
+                      {isAdmin && (
+                        <>
+                          <button
+                            className="edit-payment-btn"
+                            onClick={() => handleEditClick(payment)}
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            className="delete-payment-btn"
+                            onClick={() => handleDeletePayment(payment)}
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}

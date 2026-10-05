@@ -11,9 +11,12 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { useAuth } from "../context/AuthContext";
 import "./Equipment.css";
 
 function Equipment() {
+  const { isAdmin } = useAuth();
+
   const [equipment, setEquipment] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -68,8 +71,10 @@ function Equipment() {
     }));
   };
 
-  // Open Add modal
+  // Open Add modal - Admin only
   const handleAddEquipment = () => {
+    if (!isAdmin) return;
+
     setEditingEquipment(null);
 
     setFormData({
@@ -84,8 +89,10 @@ function Equipment() {
     setShowModal(true);
   };
 
-  // Open Edit modal
+  // Open Edit modal - Admin only
   const handleEditEquipment = (item) => {
+    if (!isAdmin) return;
+
     setEditingEquipment(item);
 
     setFormData({
@@ -100,9 +107,23 @@ function Equipment() {
     setShowModal(true);
   };
 
-  // Save equipment
+  // Update equipment condition/status - Admin + Staff
+  const handleConditionChange = async (item, condition) => {
+    try {
+      await updateDoc(doc(db, "equipment", item.id), {
+        condition,
+      });
+    } catch (error) {
+      console.error("Error updating equipment status:", error);
+      alert("Something went wrong while updating the equipment status.");
+    }
+  };
+
+  // Save equipment - Admin only
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!isAdmin) return;
 
     try {
       const equipmentData = {
@@ -134,8 +155,10 @@ function Equipment() {
     }
   };
 
-  // Delete equipment
+  // Delete equipment - Admin only
   const handleDeleteEquipment = async (id) => {
+    if (!isAdmin) return;
+
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this equipment?",
     );
@@ -171,12 +194,15 @@ function Equipment() {
           <p>Manage your gym equipment and maintenance status.</p>
         </div>
 
-        <button
-          className="add-equipment-btn"
-          onClick={handleAddEquipment}
-        >
-          + Add Equipment
-        </button>
+        {/* Admin only */}
+        {isAdmin && (
+          <button
+            className="add-equipment-btn"
+            onClick={handleAddEquipment}
+          >
+            + Add Equipment
+          </button>
+        )}
       </div>
 
       {/* SEARCH */}
@@ -210,7 +236,9 @@ function Equipment() {
                   <th>Condition</th>
                   <th>Location</th>
                   <th>Notes</th>
-                  <th>Actions</th>
+
+                  {/* Only show Actions for Admin */}
+                  {isAdmin && <th>Actions</th>}
                 </tr>
               </thead>
 
@@ -226,40 +254,64 @@ function Equipment() {
                     <td>{item.quantity}</td>
 
                     <td>
-                      <span
-                        className={`equipment-status ${item.condition
-                          ?.toLowerCase()
-                          .replace(/\s+/g, "-")}`}
-                      >
-                        {item.condition}
-                      </span>
+                      {isAdmin ? (
+                        <span
+                          className={`equipment-status ${item.condition
+                            ?.toLowerCase()
+                            .replace(/\s+/g, "-")}`}
+                        >
+                          {item.condition}
+                        </span>
+                      ) : (
+                        <select
+                          className="equipment-condition-select"
+                          value={item.condition || "Good"}
+                          onChange={(event) =>
+                            handleConditionChange(
+                              item,
+                              event.target.value,
+                            )
+                          }
+                        >
+                          <option value="Good">Good</option>
+                          <option value="Needs Maintenance">
+                            Needs Maintenance
+                          </option>
+                          <option value="Damaged">
+                            Damaged
+                          </option>
+                        </select>
+                      )}
                     </td>
 
                     <td>{item.location || "-"}</td>
 
                     <td>{item.notes || "-"}</td>
 
-                    <td>
-                      <div className="equipment-actions">
-                        <button
-                          className="edit-equipment-btn"
-                          onClick={() =>
-                            handleEditEquipment(item)
-                          }
-                        >
-                          Edit
-                        </button>
+                    {/* Admin actions only */}
+                    {isAdmin && (
+                      <td>
+                        <div className="equipment-actions">
+                          <button
+                            className="edit-equipment-btn"
+                            onClick={() =>
+                              handleEditEquipment(item)
+                            }
+                          >
+                            Edit
+                          </button>
 
-                        <button
-                          className="delete-equipment-btn"
-                          onClick={() =>
-                            handleDeleteEquipment(item.id)
-                          }
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
+                          <button
+                            className="delete-equipment-btn"
+                            onClick={() =>
+                              handleDeleteEquipment(item.id)
+                            }
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -268,8 +320,8 @@ function Equipment() {
         )}
       </div>
 
-      {/* ADD / EDIT MODAL */}
-      {showModal && (
+      {/* ADD / EDIT MODAL - ADMIN ONLY */}
+      {isAdmin && showModal && (
         <div className="modal-overlay">
           <div className="equipment-modal">
             <div className="modal-header">
@@ -362,7 +414,9 @@ function Equipment() {
                     <option value="Needs Maintenance">
                       Needs Maintenance
                     </option>
-                    <option value="Damaged">Damaged</option>
+                    <option value="Damaged">
+                      Damaged
+                    </option>
                   </select>
                 </div>
 

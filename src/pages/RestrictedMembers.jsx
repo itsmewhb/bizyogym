@@ -7,9 +7,12 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { useAuth } from "../context/AuthContext";
 import "./RestrictedMembers.css";
 
 function RestrictedMembers() {
+  const { isAdmin } = useAuth();
+
   const [members, setMembers] = useState([]);
   const [incidents, setIncidents] = useState([]);
 
@@ -38,7 +41,9 @@ function RestrictedMembers() {
           ...memberDoc.data(),
         }));
 
-        membersData.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+        membersData.sort((a, b) =>
+          (a.name || "").localeCompare(b.name || ""),
+        );
 
         setMembers(membersData);
         setLoading(false);
@@ -82,7 +87,9 @@ function RestrictedMembers() {
    * Get incidents belonging to a member
    */
   const getMemberIncidents = (memberId) => {
-    return incidents.filter((incident) => incident.memberId === memberId);
+    return incidents.filter(
+      (incident) => incident.memberId === memberId,
+    );
   };
 
   /*
@@ -94,8 +101,11 @@ function RestrictedMembers() {
 
   /*
    * Open Restrict Modal
+   * Admin only
    */
   const openRestrictModal = (member) => {
+    if (!isAdmin) return;
+
     setSelectedMember(member);
 
     setRestrictionReason("");
@@ -120,9 +130,12 @@ function RestrictedMembers() {
 
   /*
    * Restrict Member
+   * Admin only
    */
   const handleRestrict = async (e) => {
     e.preventDefault();
+
+    if (!isAdmin) return;
 
     if (!selectedMember) {
       return;
@@ -170,8 +183,11 @@ function RestrictedMembers() {
 
   /*
    * Remove Restriction
+   * Admin only
    */
   const handleRemoveRestriction = async (member) => {
+    if (!isAdmin) return;
+
     const confirmRemove = window.confirm(
       `Remove the restriction from ${member.name}?`,
     );
@@ -201,7 +217,9 @@ function RestrictedMembers() {
    * can be selected for restriction.
    */
   const eligibleMembers = members.filter(
-    (member) => !member.isRestricted && getIncidentCount(member.id) > 0,
+    (member) =>
+      !member.isRestricted &&
+      getIncidentCount(member.id) > 0,
   );
 
   /*
@@ -221,7 +239,9 @@ function RestrictedMembers() {
       (member.name || "").toLowerCase().includes(searchText) ||
       (member.email || "").toLowerCase().includes(searchText) ||
       (member.phone || "").toLowerCase().includes(searchText) ||
-      (member.restrictionReason || "").toLowerCase().includes(searchText)
+      (member.restrictionReason || "")
+        .toLowerCase()
+        .includes(searchText)
     );
   });
 
@@ -268,28 +288,33 @@ function RestrictedMembers() {
         <div>
           <h1>Restricted Members</h1>
 
-          <p>Manage members who have been restricted because of incidents.</p>
+          <p>
+            Manage members who have been restricted because of incidents.
+          </p>
         </div>
 
-        <button
-          className="restrict-member-btn"
-          onClick={() => {
-            if (eligibleMembers.length === 0) {
-              alert(
-                "There are no members with incident history available for restriction.",
-              );
+        {/* ADMIN ONLY */}
+        {isAdmin && (
+          <button
+            className="restrict-member-btn"
+            onClick={() => {
+              if (eligibleMembers.length === 0) {
+                alert(
+                  "There are no members with incident history available for restriction.",
+                );
 
-              return;
-            }
+                return;
+              }
 
-            setSelectedMember(null);
-            setRestrictionReason("");
-            setRestrictionUntil("");
-            setShowModal(true);
-          }}
-        >
-          + Restrict Member
-        </button>
+              setSelectedMember(null);
+              setRestrictionReason("");
+              setRestrictionUntil("");
+              setShowModal(true);
+            }}
+          >
+            + Restrict Member
+          </button>
+        )}
       </div>
 
       {/* Summary */}
@@ -304,7 +329,12 @@ function RestrictedMembers() {
           <span>Members With Incidents</span>
 
           <strong>
-            {members.filter((member) => getIncidentCount(member.id) > 0).length}
+            {
+              members.filter(
+                (member) =>
+                  getIncidentCount(member.id) > 0,
+              ).length
+            }
           </strong>
         </div>
       </div>
@@ -327,9 +357,13 @@ function RestrictedMembers() {
         </div>
 
         {loading || incidentsLoading ? (
-          <p className="restriction-message">Loading restricted members...</p>
+          <p className="restriction-message">
+            Loading restricted members...
+          </p>
         ) : filteredRestrictedMembers.length === 0 ? (
-          <p className="restriction-message">No restricted members found.</p>
+          <p className="restriction-message">
+            No restricted members found.
+          </p>
         ) : (
           <div className="restricted-table-container">
             <table>
@@ -341,26 +375,33 @@ function RestrictedMembers() {
                   <th>Reason</th>
                   <th>Restricted Since</th>
                   <th>Until</th>
-                  <th>Actions</th>
+
+                  {/* Admin only */}
+                  {isAdmin && <th>Actions</th>}
                 </tr>
               </thead>
 
               <tbody>
                 {filteredRestrictedMembers.map((member) => {
-                  const memberIncidents = getMemberIncidents(member.id);
+                  const memberIncidents =
+                    getMemberIncidents(member.id);
 
                   return (
                     <tr key={member.id}>
                       <td>
                         <div className="restricted-member-name">
                           <div className="restricted-avatar">
-                            {member.name?.charAt(0).toUpperCase()}
+                            {member.name
+                              ?.charAt(0)
+                              .toUpperCase()}
                           </div>
 
                           <div>
                             <strong>{member.name}</strong>
 
-                            <span>{member.email || "-"}</span>
+                            <span>
+                              {member.email || "-"}
+                            </span>
                           </div>
                         </div>
                       </td>
@@ -382,22 +423,33 @@ function RestrictedMembers() {
                         </span>
                       </td>
 
-                      <td>{formatRestrictionDate(member.restrictionDate)}</td>
+                      <td>
+                        {formatRestrictionDate(
+                          member.restrictionDate,
+                        )}
+                      </td>
 
                       <td>
                         {member.restrictionUntil
-                          ? formatRestrictionUntil(member.restrictionUntil)
+                          ? formatRestrictionUntil(
+                              member.restrictionUntil,
+                            )
                           : "No end date"}
                       </td>
 
-                      <td>
-                        <button
-                          className="remove-restriction-btn"
-                          onClick={() => handleRemoveRestriction(member)}
-                        >
-                          Unrestrict
-                        </button>
-                      </td>
+                      {/* ADMIN ONLY */}
+                      {isAdmin && (
+                        <td>
+                          <button
+                            className="remove-restriction-btn"
+                            onClick={() =>
+                              handleRemoveRestriction(member)
+                            }
+                          >
+                            Unrestrict
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -407,9 +459,12 @@ function RestrictedMembers() {
         )}
       </div>
 
-      {/* RESTRICT MEMBER MODAL */}
-      {showModal && (
-        <div className="modal-overlay" onClick={closeModal}>
+      {/* RESTRICT MEMBER MODAL - ADMIN ONLY */}
+      {isAdmin && showModal && (
+        <div
+          className="modal-overlay"
+          onClick={closeModal}
+        >
           <div
             className="restriction-modal"
             onClick={(e) => e.stopPropagation()}
@@ -418,10 +473,16 @@ function RestrictedMembers() {
               <div>
                 <h2>Restrict Member</h2>
 
-                <p>Only members with incident history can be restricted.</p>
+                <p>
+                  Only members with incident history can be
+                  restricted.
+                </p>
               </div>
 
-              <button className="close-btn" onClick={closeModal}>
+              <button
+                className="close-btn"
+                onClick={closeModal}
+              >
                 ×
               </button>
             </div>
@@ -438,15 +499,23 @@ function RestrictedMembers() {
                       (item) => item.id === e.target.value,
                     );
 
-                    setSelectedMember(member || null);
+                    setSelectedMember(
+                      member || null,
+                    );
                   }}
                   required
                 >
-                  <option value="">Select member</option>
+                  <option value="">
+                    Select member
+                  </option>
 
                   {eligibleMembers.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name} — {getIncidentCount(member.id)}{" "}
+                    <option
+                      key={member.id}
+                      value={member.id}
+                    >
+                      {member.name} —{" "}
+                      {getIncidentCount(member.id)}{" "}
                       {getIncidentCount(member.id) === 1
                         ? "incident"
                         : "incidents"}
@@ -464,8 +533,13 @@ function RestrictedMembers() {
 
                       <p>
                         {selectedMember.name} has{" "}
-                        {getIncidentCount(selectedMember.id)} recorded{" "}
-                        {getIncidentCount(selectedMember.id) === 1
+                        {getIncidentCount(
+                          selectedMember.id,
+                        )}{" "}
+                        recorded{" "}
+                        {getIncidentCount(
+                          selectedMember.id,
+                        ) === 1
                           ? "incident"
                           : "incidents"}
                         .
@@ -474,11 +548,17 @@ function RestrictedMembers() {
                   </div>
 
                   <div className="incident-history-list">
-                    {getMemberIncidents(selectedMember.id).map((incident) => (
-                      <div className="incident-history-item" key={incident.id}>
+                    {getMemberIncidents(
+                      selectedMember.id,
+                    ).map((incident) => (
+                      <div
+                        className="incident-history-item"
+                        key={incident.id}
+                      >
                         <div className="incident-history-title">
                           <strong>
-                            {incident.title || "Untitled Incident"}
+                            {incident.title ||
+                              "Untitled Incident"}
                           </strong>
 
                           <span
@@ -486,21 +566,38 @@ function RestrictedMembers() {
                               incident.severity || ""
                             )
                               .toLowerCase()
-                              .replace(/\s+/g, "-")}`}
+                              .replace(
+                                /\s+/g,
+                                "-",
+                              )}`}
                           >
-                            {incident.severity || "Unknown"}
+                            {incident.severity ||
+                              "Unknown"}
                           </span>
                         </div>
 
                         <div className="incident-history-details">
-                          <span>Type: {incident.type || "-"}</span>
+                          <span>
+                            Type:{" "}
+                            {incident.type || "-"}
+                          </span>
 
-                          <span>Date: {incident.date || "-"}</span>
+                          <span>
+                            Date:{" "}
+                            {incident.date || "-"}
+                          </span>
 
-                          <span>Status: {incident.status || "-"}</span>
+                          <span>
+                            Status:{" "}
+                            {incident.status || "-"}
+                          </span>
                         </div>
 
-                        {incident.description && <p>{incident.description}</p>}
+                        {incident.description && (
+                          <p>
+                            {incident.description}
+                          </p>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -513,7 +610,11 @@ function RestrictedMembers() {
 
                 <textarea
                   value={restrictionReason}
-                  onChange={(e) => setRestrictionReason(e.target.value)}
+                  onChange={(e) =>
+                    setRestrictionReason(
+                      e.target.value,
+                    )
+                  }
                   placeholder="Enter reason for restricting this member..."
                   rows="4"
                   required
@@ -527,10 +628,17 @@ function RestrictedMembers() {
                 <input
                   type="date"
                   value={restrictionUntil}
-                  onChange={(e) => setRestrictionUntil(e.target.value)}
+                  onChange={(e) =>
+                    setRestrictionUntil(
+                      e.target.value,
+                    )
+                  }
                 />
 
-                <small>Leave empty for an indefinite restriction.</small>
+                <small>
+                  Leave empty for an indefinite
+                  restriction.
+                </small>
               </div>
 
               {/* Actions */}

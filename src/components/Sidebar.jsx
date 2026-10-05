@@ -1,10 +1,12 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
+import { useAuth } from "../context/AuthContext";
 import "./Sidebar.css";
 
 function Sidebar() {
   const navigate = useNavigate();
+  const { userProfile, isAdmin } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -17,12 +19,16 @@ function Sidebar() {
 
   return (
     <aside className="sidebar">
+
+      {/* LOGO */}
       <div className="logo">
         <h2>BIZYO</h2>
         <span>GYM MANAGEMENT</span>
       </div>
 
+      {/* NAVIGATION */}
       <nav className="sidebar-nav">
+
         <NavLink to="/dashboard">
           📊 <span>Dashboard</span>
         </NavLink>
@@ -54,24 +60,33 @@ function Sidebar() {
         <NavLink to="/restricted-members">
           🚫 <span>Restricted Members</span>
         </NavLink>
-
-        <NavLink to="/activity-logs">
-          📋 <span>Activity Logs</span>
-        </NavLink>
+        
         <NavLink to="/membership-expiration">
           ⏰ <span>Plan Expiration</span>
         </NavLink>
-{/* 
-        <NavLink to="/settings">
-          ⚙️ <span>Settings</span>
-        </NavLink> */}
+
+        {isAdmin && (
+          <>
+            <NavLink to="/staff-accounts">
+              👤 <span>Staff Accounts</span>
+            </NavLink>
+
+            <NavLink to="/activity-logs">
+              📋 <span>Activity Logs</span>
+            </NavLink>
+          </>
+        )}
+
       </nav>
 
-      <div className="sidebar-bottom">
-        <button className="logout-btn" onClick={handleLogout}>
-          🚪 <span>Logout</span>
-        </button>
-      </div>
+      {/* LOGOUT */}
+      <button
+        className="logout-btn"
+        onClick={handleLogout}
+      >
+        ➜] <span>Logout</span>
+      </button>
+
     </aside>
   );
 }

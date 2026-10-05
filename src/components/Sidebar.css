@@ -1,13 +1,29 @@
 .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+
   width: 250px;
-  min-height: 100vh;
+  height: 100vh;
+
   background: #1e1e2f;
   color: white;
+
   display: flex;
   flex-direction: column;
+
   padding: 25px 15px;
+  box-sizing: border-box;
+
+  overflow-y: auto;
   flex-shrink: 0;
+
+  z-index: 1000;
 }
+
+/* =========================================
+   LOGO
+========================================= */
 
 .logo {
   padding: 10px 15px 35px;
@@ -25,6 +41,10 @@
   letter-spacing: 1px;
 }
 
+/* =========================================
+   NAVIGATION
+========================================= */
+
 .sidebar-nav {
   display: flex;
   flex-direction: column;
@@ -34,9 +54,16 @@
 .sidebar-nav a {
   color: #bbb;
   text-decoration: none;
+
   padding: 13px 15px;
+
   border-radius: 8px;
+
   transition: 0.3s;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .sidebar-nav a:hover,
@@ -45,25 +72,134 @@
   color: white;
 }
 
+/* =========================================
+   SIDEBAR USER PROFILE
+========================================= */
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px;
+  margin-bottom: 10px;
+
+  border-radius: 10px;
+
+  background: #161622;
+}
+
+.sidebar-user-avatar {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ff8c00;
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+}
+
+.sidebar-user-info strong {
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-info span {
+  margin-top: 3px;
+
+  color: #00c26f;
+
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* =========================================
+   LOGOUT
+========================================= */
+
 .sidebar-bottom {
   margin-top: auto;
 }
 
 .logout-btn {
+  margin-top: auto;
+
   width: 100%;
+
   padding: 12px;
+
   border: none;
   border-radius: 8px;
+
   background: #34344a;
   color: white;
+
   cursor: pointer;
+
   text-align: left;
+
   font-size: 14px;
+
+  transition: 0.3s;
 }
 
 .logout-btn:hover {
   background: #44445a;
 }
+
+/* =========================================
+   SCROLLBAR
+========================================= */
+
+.sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: #1e1e2f;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #34344a;
+  border-radius: 10px;
+}
+
+/* =========================================
+   MAIN CONTENT
+   IMPORTANT:
+   Because sidebar is fixed,
+   content needs 250px left spacing.
+========================================= */
+
+.main-content {
+  margin-left: 250px;
+  min-height: 100vh;
+}
+
+/* =========================================
+   MOBILE
+========================================= */
 
 @media (max-width: 700px) {
   .sidebar {
@@ -87,13 +223,30 @@
 
   .logo span,
   .sidebar-nav span,
-  .logout-btn span {
+  .logout-btn span,
+  .sidebar-user-info {
     display: none;
+  }
+
+  .sidebar-user {
+    justify-content: center;
+    padding: 8px;
+    background: transparent;
+  }
+
+  .sidebar-user-avatar {
+    width: 38px;
+    height: 38px;
   }
 
   .sidebar-nav a,
   .logout-btn {
+    justify-content: center;
     text-align: center;
     padding: 13px 5px;
+  }
+
+  .main-content {
+    margin-left: 70px;
   }
 }

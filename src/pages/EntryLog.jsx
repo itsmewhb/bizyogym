@@ -27,6 +27,7 @@ function EntryLog() {
 
   const scannerRef = useRef(null);
   const scanLock = useRef(false);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
   /*
    * Format Firestore timestamp
@@ -82,6 +83,14 @@ function EntryLog() {
     );
 
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
 
   /*
@@ -162,18 +171,17 @@ function EntryLog() {
 
         const untilText = member.restrictionUntil
           ? new Date(`${member.restrictionUntil}T00:00:00`).toLocaleDateString(
-              "en-PH",
-              {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              },
-            )
+            "en-PH",
+            {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            },
+          )
           : null;
 
         setScanMessage(
-          `Entry denied. ${member.name} is restricted${
-            member.restrictionReason ? `: ${member.restrictionReason}` : "."
+          `Entry denied. ${member.name} is restricted${member.restrictionReason ? `: ${member.restrictionReason}` : "."
           }${untilText ? ` Restriction until ${untilText}.` : " No end date."}`,
         );
 
@@ -186,9 +194,9 @@ function EntryLog() {
         return;
       }
 
-           /*
-       * Check member status
-       */
+      /*
+  * Check member status
+  */
       if (member.status !== "Active") {
         setScanResult(member);
 
@@ -273,16 +281,15 @@ function EntryLog() {
         setScanResult(member);
 
         setScanMessage(
-          `Entry denied. ${member.name} has not fully paid the membership.${
-            remainingBalance > 0
-              ? ` Remaining balance: ₱${remainingBalance.toLocaleString(
-                  "en-PH",
-                  {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  },
-                )}.`
-              : " Please settle the membership payment first."
+          `Entry denied. ${member.name} has not fully paid the membership.${remainingBalance > 0
+            ? ` Remaining balance: ₱${remainingBalance.toLocaleString(
+              "en-PH",
+              {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              },
+            )}.`
+            : " Please settle the membership payment first."
           }`,
         );
 
@@ -528,6 +535,25 @@ function EntryLog() {
           <p>
             Scan the member's QR code to automatically check them in or out.
           </p>
+        </div>
+
+        <div className="current-date-time">
+          <div className="current-date">
+            {currentDateTime.toLocaleDateString("en-PH", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </div>
+
+          <div className="current-time">
+            {currentDateTime.toLocaleTimeString("en-PH", {
+              hour: "numeric",
+              minute: "2-digit",
+              second: "2-digit",
+            })}
+          </div>
         </div>
       </div>
 

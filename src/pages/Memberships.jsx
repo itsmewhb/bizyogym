@@ -9,9 +9,12 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { useAuth } from "../context/AuthContext";
 import "./Memberships.css";
 
 function Memberships() {
+  const { isAdmin } = useAuth();
+
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -85,9 +88,11 @@ function Memberships() {
     setEditingPlan(null);
   };
 
-  // ADD PLAN
+  // ADD PLAN - ADMIN ONLY
   const handleAddPlan = async (e) => {
     e.preventDefault();
+
+    if (!isAdmin) return;
 
     try {
       await addDoc(collection(db, "memberships"), {
@@ -108,8 +113,10 @@ function Memberships() {
     }
   };
 
-  // EDIT BUTTON
+  // EDIT BUTTON - ADMIN ONLY
   const handleEditClick = (plan) => {
+    if (!isAdmin) return;
+
     setEditingPlan(plan);
 
     setFormData({
@@ -122,9 +129,11 @@ function Memberships() {
     setShowModal(true);
   };
 
-  // UPDATE PLAN
+  // UPDATE PLAN - ADMIN ONLY
   const handleUpdatePlan = async (e) => {
     e.preventDefault();
+
+    if (!isAdmin) return;
 
     try {
       await updateDoc(doc(db, "memberships", editingPlan.id), {
@@ -144,8 +153,10 @@ function Memberships() {
     }
   };
 
-  // DELETE PLAN
+  // DELETE PLAN - ADMIN ONLY
   const handleDeletePlan = async (id) => {
+    if (!isAdmin) return;
+
     const confirmed = window.confirm(
       "Are you sure you want to delete this membership plan?"
     );
@@ -162,7 +173,10 @@ function Memberships() {
     }
   };
 
+  // ADD MODAL - ADMIN ONLY
   const openAddModal = () => {
+    if (!isAdmin) return;
+
     resetForm();
     setShowModal(true);
   };
@@ -172,20 +186,30 @@ function Memberships() {
       <div className="memberships-header">
         <div>
           <h1>Membership Plans</h1>
-          <p>Create and manage your gym membership plans.</p>
+          <p>
+            {isAdmin
+              ? "Create and manage your gym membership plans."
+              : "View available gym membership plans."}
+          </p>
         </div>
 
-        <button className="add-plan-btn" onClick={openAddModal}>
-          + Add Membership Plan
-        </button>
+        {/* ADMIN ONLY */}
+        {isAdmin && (
+          <button className="add-plan-btn" onClick={openAddModal}>
+            + Add Membership Plan
+          </button>
+        )}
       </div>
 
       <div className="plans-grid">
         {loading ? (
-          <p className="plans-message">Loading membership plans...</p>
+          <p className="plans-message">
+            Loading membership plans...
+          </p>
         ) : plans.length === 0 ? (
           <p className="plans-message">
-            No membership plans found. Create your first plan.
+            No membership plans found.{" "}
+            {isAdmin && "Create your first plan."}
           </p>
         ) : (
           plans.map((plan) => (
@@ -207,28 +231,31 @@ function Memberships() {
                 {plan.description || "No description provided."}
               </p>
 
-              <div className="plan-actions">
-                <button
-                  className="edit-btn"
-                  onClick={() => handleEditClick(plan)}
-                >
-                  Edit
-                </button>
+              {/* ADMIN ONLY */}
+              {isAdmin && (
+                <div className="plan-actions">
+                  <button
+                    className="edit-btn"
+                    onClick={() => handleEditClick(plan)}
+                  >
+                    Edit
+                  </button>
 
-                <button
-                  className="delete-btn"
-                  onClick={() => handleDeletePlan(plan.id)}
-                >
-                  Delete
-                </button>
-              </div>
+                  <button
+                    className="delete-btn"
+                    onClick={() => handleDeletePlan(plan.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           ))
         )}
       </div>
 
-      {/* MODAL */}
-      {showModal && (
+      {/* MODAL - ADMIN ONLY */}
+      {isAdmin && showModal && (
         <div
           className="modal-overlay"
           onClick={() => setShowModal(false)}

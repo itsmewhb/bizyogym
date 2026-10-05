@@ -69,6 +69,29 @@ function ActivityLogs() {
   };
 
   /*
+   * Get User Role
+   *
+   * New activity logs:
+   * - role === "staff" -> Staff
+   * - role === "admin" -> Admin
+   *
+   * Older logs without a role:
+   * - Use the existing user field
+   * - Default to Admin
+   */
+  const getLogUser = (log) => {
+    if (log.role === "staff") {
+      return "Staff";
+    }
+
+    if (log.role === "admin") {
+      return "Admin";
+    }
+
+    return log.user || "Admin";
+  };
+
+  /*
    * Search
    */
   const filteredLogs = logs.filter((log) => {
@@ -77,7 +100,7 @@ function ActivityLogs() {
     return (
       (log.action || "").toLowerCase().includes(searchText) ||
       (log.description || "").toLowerCase().includes(searchText) ||
-      (log.user || "").toLowerCase().includes(searchText) ||
+      getLogUser(log).toLowerCase().includes(searchText) ||
       (log.targetType || "").toLowerCase().includes(searchText)
     );
   });
@@ -134,6 +157,7 @@ function ActivityLogs() {
               <tbody>
                 {filteredLogs.map((log) => (
                   <tr key={log.id}>
+                    {/* Date & Time */}
                     <td>
                       <div className="activity-date">
                         {formatDate(log.createdAt)}
@@ -144,6 +168,7 @@ function ActivityLogs() {
                       </div>
                     </td>
 
+                    {/* Action */}
                     <td>
                       <span
                         className={`activity-action ${
@@ -156,16 +181,21 @@ function ActivityLogs() {
                       </span>
                     </td>
 
+                    {/* Description */}
                     <td>
                       <span className="activity-description">
                         {log.description || "-"}
                       </span>
                     </td>
 
+                    {/* User */}
                     <td>
-                      {log.user || "Admin"}
+                      <span className="activity-user">
+                        {getLogUser(log)}
+                      </span>
                     </td>
 
+                    {/* Target */}
                     <td>
                       <span className="activity-target">
                         {log.targetType || "-"}
