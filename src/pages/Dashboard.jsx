@@ -198,7 +198,7 @@ function Dashboard() {
 
           <div className="sidebar-user-info">
             <strong>
-              {userProfile?.firstName || "User"}
+              {userProfile?.name || "User"}
 
               {userProfile?.lastName
                 ? ` ${userProfile.lastName}`
