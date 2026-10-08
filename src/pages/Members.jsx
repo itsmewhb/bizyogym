@@ -180,7 +180,7 @@ function Members() {
 
     return () => unsubscribe();
   }, []);
-  
+
   // =========================================================
   // DELETE MEMBER
   // =========================================================
@@ -244,6 +244,11 @@ function Members() {
 
   const handleUpdateMember = async (e) => {
     e.preventDefault();
+
+    // Prevent duplicates belonging to other members
+    if (checkDuplicateMember(editingMember.id)) {
+      return;
+    }
 
     try {
       const selectedPlan = membershipPlans.find(
@@ -327,6 +332,11 @@ function Members() {
 
   const handleAddMember = async (e) => {
     e.preventDefault();
+
+    // Prevent duplicate name, email, or phone number
+    if (checkDuplicateMember()) {
+      return;
+    }
 
     try {
       // Find selected membership plan
@@ -417,8 +427,58 @@ function Members() {
   );
 
   // =========================================================
+  // CHECK FOR DUPLICATE MEMBER DETAILS
+  // =========================================================
+
+  const checkDuplicateMember = (excludeMemberId = null) => {
+    const name = formData.name.trim().replace(/\s+/g, " ").toLowerCase();
+    const email = formData.email.trim().toLowerCase();
+    const phone = formData.phone.trim();
+
+    const duplicateName = members.some(
+      (member) =>
+        member.id !== excludeMemberId &&
+        (member.name || "")
+          .trim()
+          .replace(/\s+/g, " ")
+          .toLowerCase() === name
+    );
+
+    const duplicateEmail = members.some(
+      (member) =>
+        member.id !== excludeMemberId &&
+        (member.email || "").trim().toLowerCase() === email
+    );
+
+    const duplicatePhone = members.some(
+      (member) =>
+        member.id !== excludeMemberId &&
+        (member.phone || "").trim() === phone
+    );
+
+    if (duplicateName) {
+      alert("A member with this name already exists!");
+      return true;
+    }
+
+    if (duplicateEmail) {
+      alert("A member with this email already exists!");
+      return true;
+    }
+
+    if (duplicatePhone) {
+      alert("A member with this phone number already exists!");
+      return true;
+    }
+
+    return false;
+  };
+
+  // =========================================================
   // RENDER
   // =========================================================
+
+
 
   return (
     <div className="members-page">

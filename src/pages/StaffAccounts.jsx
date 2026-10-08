@@ -40,23 +40,20 @@ const staffAuth = getAuth(staffApp);
 function StaffAccounts() {
   const { isAdmin } = useAuth();
 
-  const [staffAccounts, setStaffAccounts] =
-    useState([]);
+  const [staffAccounts, setStaffAccounts] = useState([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [showModal, setShowModal] =
-    useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-  const [creating, setCreating] =
-    useState(false);
+  const [creating, setCreating] = useState(false);
 
-  const [updatingStatus, setUpdatingStatus] =
-    useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(null);
 
-  const [search, setSearch] =
-    useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [search, setSearch] = useState("");
 
   const [formData, setFormData] =
     useState({
@@ -322,12 +319,10 @@ function StaffAccounts() {
 
       await logActivity(
         `Staff Account ${newStatus}`,
-        `${
-          newStatus === "Active"
-            ? "Activated"
-            : "Deactivated"
-        } Staff account for ${
-          staff.name
+        `${newStatus === "Active"
+          ? "Activated"
+          : "Deactivated"
+        } Staff account for ${staff.name
         } (${staff.email})`,
       );
 
@@ -465,7 +460,7 @@ function StaffAccounts() {
                      */
                     const status =
                       staff.status ===
-                      "Inactive"
+                        "Inactive"
                         ? "Inactive"
                         : "Active";
 
@@ -499,12 +494,11 @@ function StaffAccounts() {
 
                         <td>
                           <span
-                            className={`staff-status-badge ${
-                              status ===
+                            className={`staff-status-badge ${status ===
                               "Active"
-                                ? "active"
-                                : "inactive"
-                            }`}
+                              ? "active"
+                              : "inactive"
+                              }`}
                           >
                             {status}
                           </span>
@@ -513,24 +507,23 @@ function StaffAccounts() {
                         <td>
                           {createdAt
                             ? createdAt.toLocaleDateString(
-                                "en-PH",
-                                {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                },
-                              )
+                              "en-PH",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              },
+                            )
                             : "-"}
                         </td>
 
                         <td>
                           <button
-                            className={`staff-status-btn ${
-                              status ===
+                            className={`staff-status-btn ${status ===
                               "Active"
-                                ? "deactivate"
-                                : "activate"
-                            }`}
+                              ? "deactivate"
+                              : "activate"
+                              }`}
                             onClick={() =>
                               handleToggleStatus(
                                 staff,
@@ -542,10 +535,10 @@ function StaffAccounts() {
                             }
                           >
                             {updatingStatus ===
-                            staff.id
+                              staff.id
                               ? "Updating..."
                               : status ===
-                                  "Active"
+                                "Active"
                                 ? "Deactivate"
                                 : "Activate"}
                           </button>
@@ -619,41 +612,57 @@ function StaffAccounts() {
               </div>
 
               <div className="staff-form-group">
-                <label>
-                  Password
-                </label>
+                <label>Password</label>
 
-                <input
-                  type="password"
-                  name="password"
-                  value={
-                    formData.password
-                  }
-                  onChange={handleChange}
-                  placeholder="Enter password"
-                  required
-                  minLength={6}
-                  disabled={creating}
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter password"
+                    required
+                    minLength={6}
+                    disabled={creating}
+                  />
+
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={creating}
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
               </div>
 
               <div className="staff-form-group">
-                <label>
-                  Confirm Password
-                </label>
+                <label>Confirm Password</label>
 
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={
-                    formData.confirmPassword
-                  }
-                  onChange={handleChange}
-                  placeholder="Confirm password"
-                  required
-                  minLength={6}
-                  disabled={creating}
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirm password"
+                    required
+                    minLength={6}
+                    disabled={creating}
+                  />
+
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() =>
+                      setShowConfirmPassword(!showConfirmPassword)
+                    }
+                    disabled={creating}
+                  >
+                    {showConfirmPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
               </div>
 
               <div className="staff-account-info">

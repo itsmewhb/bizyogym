@@ -445,3 +445,41 @@
     width: 100%;
   }
 }
+/* PASSWORD SHOW / HIDE */
+
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 65px;
+  box-sizing: border-box;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  border: none;
+  background: transparent;
+  color: #ff8c00;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.password-toggle-btn:hover {
+  color: #ffad42;
+}
+
+.password-toggle-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
