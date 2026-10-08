@@ -1,67 +1,218 @@
+
+/* =========================================================
+   BIZYO GYM - MEMBERS PAGE
+   PREMIUM DARK THEME
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   MEMBERS PAGE
+   ========================================================= */
+
 .members-page {
+  position: relative;
   width: 100%;
+  min-height: 100%;
   color: #fff;
 }
 
-/* HEADER */
+/* subtle background glow */
+.members-page::before {
+  content: "";
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  top: 60px;
+  right: -180px;
+  background: rgba(255, 140, 0, 0.045);
+  filter: blur(100px);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .members-header {
+  position: relative;
+  z-index: 1;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+
+  margin-bottom: 28px;
+  padding-bottom: 22px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .members-header h1 {
-  margin: 0 0 5px;
-  font-size: 28px;
+  margin: 0 0 7px;
+
+  color: #fff;
+
+  font-size: 29px;
+  font-weight: 750;
+
+  letter-spacing: -0.6px;
 }
 
 .members-header p {
   margin: 0;
-  color: #999;
+
+  color: #777;
+
+  font-size: 13px;
 }
 
+/* =========================================================
+   ADD MEMBER BUTTON
+   ========================================================= */
+
 .add-member-btn {
-  padding: 11px 18px;
+  position: relative;
+  overflow: hidden;
+
+  padding: 12px 19px;
+
   border: none;
-  border-radius: 8px;
-  background: #ff8c00;
+  border-radius: 9px;
+
+  background: linear-gradient(
+    135deg,
+    #ff9d24,
+    #ff8c00
+  );
+
   color: #fff;
-  font-size: 14px;
-  font-weight: 600;
+
+  font-size: 13px;
+  font-weight: 700;
+
   cursor: pointer;
+
+  box-shadow:
+    0 6px 18px rgba(255, 140, 0, 0.18);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
 }
 
 .add-member-btn:hover {
-  opacity: 0.9;
+  transform: translateY(-2px);
+
+  filter: brightness(1.05);
+
+  box-shadow:
+    0 9px 25px rgba(255, 140, 0, 0.28);
 }
 
-/* MEMBERS CARD */
+.add-member-btn:active {
+  transform: translateY(0);
+}
+
+/* =========================================================
+   MEMBERS CARD
+   ========================================================= */
 
 .members-card {
-  background: #1e1e2d;
+  position: relative;
+  z-index: 1;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(31, 31, 46, 0.98),
+      rgba(25, 25, 38, 0.98)
+    );
+
   padding: 25px;
-  border-radius: 12px;
+
+  border-radius: 16px;
+
   border: 1px solid #303044;
+
+  box-shadow:
+    0 10px 35px rgba(0, 0, 0, 0.22);
+
+  overflow: hidden;
 }
 
-/* TOOLBAR */
+/* subtle orange glow inside card */
+.members-card::before {
+  content: "";
+
+  position: absolute;
+
+  width: 180px;
+  height: 180px;
+
+  top: -130px;
+  right: -80px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 140, 0, 0.05);
+
+  filter: blur(25px);
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   TOOLBAR
+   ========================================================= */
 
 .members-toolbar {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
   margin-bottom: 20px;
 }
 
+/* =========================================================
+   SEARCH INPUT
+   ========================================================= */
+
 .members-toolbar input {
-  width: 300px;
+  width: 330px;
   max-width: 100%;
-  padding: 12px 14px;
+
+  padding: 12px 15px;
+
   background: #161622;
+
   color: #fff;
+
   border: 1px solid #303044;
-  border-radius: 8px;
-  font-size: 14px;
+
+  border-radius: 9px;
+
+  font-size: 13px;
+
   outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.members-toolbar input:hover {
+  border-color: #414158;
 }
 
 .members-toolbar input::placeholder {
@@ -69,277 +220,805 @@
 }
 
 .members-toolbar input:focus {
+  background: #181824;
+
   border-color: #ff8c00;
+
+  box-shadow:
+    0 0 0 3px rgba(255, 140, 0, 0.08);
 }
 
-/* TABLE */
+/* =========================================================
+   TABLE CONTAINER
+   ========================================================= */
 
 .table-container {
   width: 100%;
+
   overflow-x: auto;
+
+  border-radius: 11px;
+
+  border: 1px solid rgba(48, 48, 68, 0.65);
 }
+
+/* =========================================================
+   TABLE
+   ========================================================= */
 
 table {
   width: 100%;
-  border-collapse: collapse;
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+  min-width: 850px;
 }
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
 
 th {
   text-align: left;
-  padding: 14px;
-  color: #aaa;
-  font-size: 13px;
-  font-weight: 600;
-  background: #28283a;
+
+  padding: 14px 15px;
+
+  color: #888;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #29293c,
+      #252536
+    );
+
+  border-bottom: 1px solid #3a3a50;
+
   white-space: nowrap;
 }
 
+th:first-child {
+  border-top-left-radius: 10px;
+}
+
+th:last-child {
+  border-top-right-radius: 10px;
+}
+
+/* =========================================================
+   TABLE CELLS
+   ========================================================= */
+
 td {
-  padding: 14px;
-  color: #fff;
-  font-size: 14px;
-  border-bottom: 1px solid #303044;
+  padding: 13px 15px;
+
+  color: #ddd;
+
+  font-size: 13px;
+
+  border-bottom: 1px solid rgba(48, 48, 68, 0.65);
+
   white-space: nowrap;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+tbody tr {
+  background: rgba(22, 22, 34, 0.18);
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
 tbody tr:hover {
-  background: #252536;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 140, 0, 0.055),
+      rgba(255, 140, 0, 0.015)
+    );
 }
 
-/* MEMBER NAME */
+tbody tr:hover td {
+  color: #fff;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================================
+   MEMBER NAME
+   ========================================================= */
 
 .member-name {
   display: flex;
+
   align-items: center;
-  gap: 10px;
-  font-weight: 500;
+
+  gap: 11px;
+
+  font-weight: 600;
 }
+
+/* =========================================================
+   TABLE AVATAR
+   ========================================================= */
 
 .table-avatar {
   width: 38px;
   height: 38px;
-  background: #28283a;
-  color: white;
+
+  flex-shrink: 0;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ff9d24,
+      #d96600
+    );
+
+  color: #fff;
+
   border-radius: 50%;
+
   display: flex;
+
   justify-content: center;
+
   align-items: center;
-  font-weight: bold;
+
+  font-size: 12px;
+
+  font-weight: 750;
+
+  box-shadow:
+    0 5px 15px rgba(255, 140, 0, 0.14);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-/* MEMBER STATUS */
+tbody tr:hover .table-avatar {
+  transform: scale(1.06);
+
+  box-shadow:
+    0 6px 18px rgba(255, 140, 0, 0.25);
+}
+
+/* =========================================================
+   MEMBER STATUS
+   ========================================================= */
 
 .member-status {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
   padding: 5px 10px;
+
   border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.3px;
+
+  white-space: nowrap;
 }
+
+/* small status dot */
+.member-status::before {
+  content: "";
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+/* ACTIVE */
 
 .member-status.active {
-  background: rgba(0, 194, 111, 0.15);
+  background: rgba(0, 194, 111, 0.10);
+
   color: #00c26f;
+
+  border: 1px solid rgba(0, 194, 111, 0.16);
 }
+
+/* INACTIVE */
 
 .member-status.inactive {
-  background: rgba(255, 60, 60, 0.12);
+  background: rgba(255, 60, 60, 0.10);
+
   color: #ff5c5c;
+
+  border: 1px solid rgba(255, 60, 60, 0.15);
 }
 
-/* ACTION BUTTONS */
+/* RESTRICTED */
+
+.member-status.restricted {
+  background: rgba(255, 60, 60, 0.12);
+
+  color: #ff5c5c;
+
+  border: 1px solid rgba(255, 60, 60, 0.16);
+}
+
+/* EXPIRED */
+
+.member-status.expired {
+  background: rgba(255, 92, 92, 0.12);
+
+  color: #ff5c5c;
+
+  border: 1px solid rgba(255, 92, 92, 0.16);
+}
+
+/* =========================================================
+   EXPIRATION INFO
+   ========================================================= */
+
+.expiration-info {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.expiration-info strong {
+  color: #eee;
+
+  font-size: 12px;
+
+  font-weight: 650;
+}
+
+.expiration-badge {
+  width: fit-content;
+
+  padding: 4px 8px;
+
+  border-radius: 12px;
+
+  font-size: 9px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.2px;
+}
+
+.expiration-badge.active {
+  background: rgba(0, 194, 111, 0.10);
+
+  color: #00c26f;
+
+  border: 1px solid rgba(0, 194, 111, 0.12);
+}
+
+.expiration-badge.expiring-soon {
+  background: rgba(255, 140, 0, 0.10);
+
+  color: #ff8c00;
+
+  border: 1px solid rgba(255, 140, 0, 0.12);
+}
+
+.expiration-badge.expired {
+  background: rgba(255, 92, 92, 0.10);
+
+  color: #ff5c5c;
+
+  border: 1px solid rgba(255, 92, 92, 0.12);
+}
+
+.expiration-badge.no-date {
+  background: rgba(153, 153, 153, 0.10);
+
+  color: #888;
+
+  border: 1px solid rgba(153, 153, 153, 0.10);
+}
+
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
 
 .edit-btn,
-.delete-btn {
+.delete-btn,
+.qr-btn {
   border: none;
+
   padding: 7px 10px;
-  border-radius: 6px;
+
+  border-radius: 7px;
+
   cursor: pointer;
+
   margin-right: 5px;
-  font-size: 12px;
-  font-weight: 600;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
+.edit-btn:hover,
+.delete-btn:hover,
+.qr-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* EDIT */
+
 .edit-btn {
-  background: #28283a;
-  color: #fff;
+  background: #29293c;
+
+  color: #ddd;
+
+  border: 1px solid #38384d;
 }
 
 .edit-btn:hover {
   background: #36364c;
+
+  color: #fff;
+
+  border-color: #4a4a62;
 }
 
+/* DELETE */
+
 .delete-btn {
-  background: rgba(255, 60, 60, 0.12);
+  background: rgba(255, 60, 60, 0.09);
+
   color: #ff5c5c;
+
+  border: 1px solid rgba(255, 60, 60, 0.13);
 }
 
 .delete-btn:hover {
-  background: rgba(255, 60, 60, 0.2);
+  background: rgba(255, 60, 60, 0.17);
+
+  border-color: rgba(255, 60, 60, 0.25);
 }
 
-/* QR BUTTON */
+/* QR */
 
 .qr-btn {
-  border: none;
-  background: #06f;
-  color: #fff;
-  padding: 7px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
+  background: rgba(255, 140, 0, 0.10);
+
+  color: #ff8c00;
+
+  border: 1px solid rgba(255, 140, 0, 0.15);
 }
 
 .qr-btn:hover {
-  opacity: 0.85;
+  background: rgba(255, 140, 0, 0.18);
+
+  border-color: rgba(255, 140, 0, 0.3);
 }
 
-/* LOADING / EMPTY */
+/* =========================================================
+   LOADING / EMPTY
+   ========================================================= */
 
 .loading-message,
 .empty-message {
   text-align: center;
-  padding: 30px !important;
-  color: #999;
+
+  padding: 40px !important;
+
+  color: #777;
+
+  font-size: 13px;
 }
 
-/* MODAL */
+/* =========================================================
+   MODAL OVERLAY
+   ========================================================= */
 
 .modal-overlay {
   position: fixed;
+
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255, 140, 0, 0.025),
+      transparent 45%
+    ),
+    rgba(0, 0, 0, 0.78);
+
+  backdrop-filter: blur(7px);
+
   display: flex;
+
   justify-content: center;
+
   align-items: center;
+
   padding: 20px;
+
   z-index: 1000;
+
+  animation: modalFade 0.2s ease;
 }
+
+@keyframes modalFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   MEMBER MODAL
+   ========================================================= */
 
 .member-modal {
+  position: relative;
+
   width: 90%;
+
   max-width: 500px;
-  background: #1e1e2d;
-  padding: 25px;
-  border-radius: 12px;
-  border: 1px solid #303044;
+
+  background:
+    linear-gradient(
+      145deg,
+      #222235,
+      #1b1b2a
+    );
+
+  padding: 27px;
+
+  border-radius: 16px;
+
+  border: 1px solid #38384e;
+
   color: #fff;
+
   max-height: 90vh;
+
   overflow-y: auto;
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.55),
+    0 0 35px rgba(255, 140, 0, 0.04);
+
+  animation: modalSlide 0.25s ease;
 }
 
-/* MODAL HEADER */
+@keyframes modalSlide {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================
+   MODAL HEADER
+   ========================================================= */
 
 .modal-header {
   display: flex;
+
   justify-content: space-between;
+
   align-items: center;
+
   margin-bottom: 25px;
+
+  padding-bottom: 17px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .modal-header h2 {
   margin: 0;
+
   color: #fff;
+
+  font-size: 20px;
+
+  font-weight: 700;
 }
 
 .close-btn {
-  border: none;
-  background: transparent;
-  color: #aaa;
-  font-size: 28px;
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  border: 1px solid #303044;
+
+  background: #181824;
+
+  color: #888;
+
+  border-radius: 8px;
+
+  font-size: 22px;
+
   cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .close-btn:hover {
   color: #fff;
+
+  background: rgba(255, 60, 60, 0.10);
+
+  border-color: rgba(255, 60, 60, 0.25);
 }
 
-/* FORM */
+/* =========================================================
+   FORM
+   ========================================================= */
 
 .form-group {
   display: flex;
+
   flex-direction: column;
+
   margin-bottom: 16px;
 }
 
 .form-group label {
   margin-bottom: 7px;
-  color: #ddd;
-  font-size: 13px;
-  font-weight: 600;
+
+  color: #ccc;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.2px;
 }
 
 .form-group input,
 .form-group select {
-  padding: 12px;
+  width: 100%;
+
+  padding: 12px 13px;
+
   background: #161622;
+
   color: #fff;
+
   border: 1px solid #303044;
-  border-radius: 8px;
-  font-size: 14px;
+
+  border-radius: 9px;
+
+  font-size: 13px;
+
   outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.form-group input:hover,
+.form-group select:hover {
+  border-color: #414158;
 }
 
 .form-group input::placeholder {
-  color: #666;
+  color: #5f5f70;
 }
 
 .form-group input:focus,
 .form-group select:focus {
+  background: #181824;
+
   border-color: #ff8c00;
+
+  box-shadow:
+    0 0 0 3px rgba(255, 140, 0, 0.07);
 }
 
 .form-group select option {
   background: #161622;
+
   color: #fff;
 }
 
-/* MODAL ACTIONS */
+/* =========================================================
+   EXPIRATION PREVIEW
+   ========================================================= */
+
+.expiration-preview {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+
+  margin-bottom: 18px;
+
+  padding: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 140, 0, 0.06),
+      rgba(255, 140, 0, 0.015)
+    );
+
+  border: 1px solid rgba(255, 140, 0, 0.12);
+
+  border-radius: 10px;
+}
+
+.expiration-preview div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.expiration-preview span {
+  color: #777;
+
+  font-size: 10px;
+}
+
+.expiration-preview strong {
+  color: #ff8c00;
+
+  font-size: 12px;
+
+  font-weight: 700;
+}
+
+/* =========================================================
+   MODAL ACTIONS
+   ========================================================= */
 
 .modal-actions {
   display: flex;
+
   justify-content: flex-end;
+
   gap: 10px;
+
   margin-top: 25px;
+
+  padding-top: 18px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .cancel-btn,
 .save-btn {
   padding: 11px 18px;
+
   border: none;
+
   border-radius: 8px;
+
   cursor: pointer;
-  font-weight: 600;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .cancel-btn {
-  background: #28283a;
-  color: #fff;
+  background: #29293c;
+
+  color: #ddd;
+
+  border: 1px solid #38384d;
 }
 
 .cancel-btn:hover {
   background: #36364c;
+
+  color: #fff;
+
+  transform: translateY(-1px);
 }
 
 .save-btn {
-  background: #ff8c00;
+  background:
+    linear-gradient(
+      135deg,
+      #ff9d24,
+      #ff8c00
+    );
+
   color: #fff;
+
+  box-shadow:
+    0 5px 15px rgba(255, 140, 0, 0.15);
 }
 
 .save-btn:hover {
-  opacity: 0.9;
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 8px 20px rgba(255, 140, 0, 0.25);
 }
 
-/* QR MODAL */
+/* =========================================================
+   QR MODAL
+   ========================================================= */
 
 .qr-modal {
   width: 100%;
+
   max-width: 400px;
-  background: #1e1e2d;
-  border-radius: 12px;
-  padding: 25px;
-  border: 1px solid #303044;
+
+  background:
+    linear-gradient(
+      145deg,
+      #222235,
+      #1b1b2a
+    );
+
+  border-radius: 16px;
+
+  padding: 27px;
+
+  border: 1px solid #38384e;
+
   color: #fff;
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.55);
+
+  animation: modalSlide 0.25s ease;
 }
 
 .qr-content {
@@ -347,39 +1026,133 @@ tbody tr:hover {
 }
 
 .qr-content h3 {
-  margin: 5px 0;
+  margin: 5px 0 6px;
+
   color: #fff;
+
+  font-size: 20px;
+
+  font-weight: 700;
 }
 
 .qr-content p {
-  color: #999;
-  font-size: 14px;
+  color: #777;
+
+  font-size: 12px;
+
   margin-bottom: 20px;
 }
 
+/* =========================================================
+   QR CODE
+   ========================================================= */
+
 .qr-code-container {
   display: flex;
+
   justify-content: center;
+
   align-items: center;
+
   background: #fff;
+
   width: fit-content;
-  padding: 15px;
-  margin: 0 auto 15px;
-  border-radius: 8px;
+
+  padding: 16px;
+
+  margin: 0 auto 16px;
+
+  border-radius: 11px;
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .qr-content small {
-  color: #777;
+  color: #666;
+
   word-break: break-all;
+
+  font-size: 10px;
 }
 
-/* RESPONSIVE */
+/* =========================================================
+   MODAL SCROLLBAR
+   ========================================================= */
+
+.member-modal::-webkit-scrollbar,
+.qr-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.member-modal::-webkit-scrollbar-track,
+.qr-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.member-modal::-webkit-scrollbar-thumb,
+.qr-modal::-webkit-scrollbar-thumb {
+  background: #38384e;
+
+  border-radius: 10px;
+}
+
+.member-modal::-webkit-scrollbar-thumb:hover,
+.qr-modal::-webkit-scrollbar-thumb:hover {
+  background: #ff8c00;
+}
+
+/* =========================================================
+   TABLE SCROLLBAR
+   ========================================================= */
+
+.table-container::-webkit-scrollbar {
+  height: 7px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #161622;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #303044;
+
+  border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #ff8c00;
+}
+
+/* =========================================================
+   RESPONSIVE - TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .members-card {
+    padding: 20px;
+  }
+
+  .members-toolbar input {
+    width: 280px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE - MOBILE
+   ========================================================= */
 
 @media (max-width: 700px) {
   .members-header {
     flex-direction: column;
+
     align-items: flex-start;
+
     gap: 15px;
+  }
+
+  .members-header h1 {
+    font-size: 25px;
   }
 
   .add-member-btn {
@@ -388,10 +1161,24 @@ tbody tr:hover {
 
   .members-card {
     padding: 15px;
+
+    border-radius: 13px;
+  }
+
+  .members-toolbar {
+    width: 100%;
+  }
+
+  .members-toolbar input {
+    width: 100%;
   }
 
   .member-modal {
+    width: 95%;
+
     padding: 20px;
+
+    border-radius: 14px;
   }
 
   .modal-actions {
@@ -402,92 +1189,72 @@ tbody tr:hover {
   .save-btn {
     width: 100%;
   }
+
+  .qr-modal {
+    width: 95%;
+
+    padding: 22px;
+  }
 }
 
-.member-status.restricted {
-  background: rgba(255, 60, 60, 0.15);
-  color: #ff5c5c;
-}
-
-.expiration-info {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.expiration-info strong {
-  color: #fff;
-  font-size: 13px;
-}
-
-.expiration-badge {
-  width: fit-content;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.expiration-badge.active {
-  background: rgba(0, 194, 111, 0.12);
-  color: #00c26f;
-}
-
-.expiration-badge.expiring-soon {
-  background: rgba(255, 140, 0, 0.12);
-  color: #ff8c00;
-}
-
-.expiration-badge.expired {
-  background: rgba(255, 92, 92, 0.12);
-  color: #ff5c5c;
-}
-
-.expiration-badge.no-date {
-  background: rgba(153, 153, 153, 0.12);
-  color: #999;
-}
-
-/* EXPIRATION PREVIEW */
-
-.expiration-preview {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 18px;
-  padding: 14px;
-  background: #161622;
-  border: 1px solid #303044;
-  border-radius: 8px;
-}
-
-.expiration-preview div {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.expiration-preview span {
-  color: #777;
-  font-size: 11px;
-}
-
-.expiration-preview strong {
-  color: #ff8c00;
-  font-size: 13px;
-}
+/* =========================================================
+   RESPONSIVE - SMALL MOBILE
+   ========================================================= */
 
 @media (max-width: 600px) {
   .expiration-preview {
     grid-template-columns: 1fr;
   }
+
+  .members-header {
+    margin-bottom: 20px;
+  }
+
+  .members-header p {
+    font-size: 12px;
+  }
+
+  .table-avatar {
+    width: 34px;
+    height: 34px;
+
+    font-size: 11px;
+  }
+
+  .member-status {
+    padding: 4px 8px;
+
+    font-size: 9px;
+  }
 }
 
-.member-status.expired {
-  background: rgba(255, 92, 92, 0.15);
-  color: #ff5c5c;
-}
-.member-status.expired {
-  background: rgba(255, 92, 92, 0.15);
-  color: #ff5c5c;
+/* =========================================================
+   RESPONSIVE - VERY SMALL
+   ========================================================= */
+
+@media (max-width: 420px) {
+  .members-page {
+    padding: 0;
+  }
+
+  .members-header h1 {
+    font-size: 23px;
+  }
+
+  .members-card {
+    padding: 12px;
+  }
+
+  .member-modal {
+    padding: 17px;
+  }
+
+  .modal-header h2 {
+    font-size: 18px;
+  }
+
+  .form-group input,
+  .form-group select {
+    padding: 11px;
+  }
 }
