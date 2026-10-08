@@ -1268,11 +1268,67 @@ function Payments() {
                     Bank Transfer
                   </option>
 
-                  <option value="Card">
-                    Card
-                  </option>
                 </select>
               </div>
+
+              {/* GCash Payment Information */}
+              {formData.paymentMethod === "GCash" && (
+                <div className="payment-instructions gcash-instructions">
+                  <h3>GCash Payment</h3>
+
+                  <p>
+                    Scan the GCash QR code below or send the payment
+                    to the GCash number.
+                  </p>
+
+                  <div className="payment-qr-container">
+                    <img
+                      src="/gcash-qr.jpg"
+                      alt="GCash QR Code"
+                      className="payment-qr"
+                    />
+                  </div>
+
+                  <div className="payment-account-info">
+                    <span>GCash Number</span>
+                    <strong>09693222930</strong>
+                  </div>
+
+                  <p className="payment-reminder">
+                    Please make sure the payment amount matches the
+                    membership price.
+                  </p>
+                </div>
+              )}
+
+              {/* Bank Transfer Payment Information */}
+              {formData.paymentMethod === "Bank Transfer" && (
+                <div className="payment-instructions bank-instructions">
+                  <h3>Bank Transfer</h3>
+
+                  <p>
+                    Scan the bank QR code below to make your payment.
+                  </p>
+
+                  <div className="payment-qr-container">
+                    <img
+                      src="/bank-qr.jpg"
+                      alt="Bank Transfer QR Code"
+                      className="payment-qr"
+                    />
+                  </div>
+
+                  <div className="payment-account-info">
+                    <span>Bank Account</span>
+                    <strong>WAHAB D</strong>
+                  </div>
+
+                  <p className="payment-reminder">
+                    Please make sure the payment amount matches the
+                    membership price.
+                  </p>
+                </div>
+              )}
 
               {/* Fixed Membership Plan */}
               <div className="form-group">
