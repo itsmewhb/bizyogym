@@ -77,6 +77,23 @@ function Memberships() {
     }));
   };
 
+  // CHECK FOR DUPLICATE PLAN NAME
+  const isDuplicatePlanName = (excludePlanId = null) => {
+    const newPlanName = formData.name
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+
+    return plans.some(
+      (plan) =>
+        plan.id !== excludePlanId &&
+        (plan.name || "")
+          .trim()
+          .replace(/\s+/g, " ")
+          .toLowerCase() === newPlanName
+    );
+  };
+
   const resetForm = () => {
     setFormData({
       name: "",
@@ -94,9 +111,15 @@ function Memberships() {
 
     if (!isAdmin) return;
 
+    // Prevent duplicate plan names
+    if (isDuplicatePlanName()) {
+      alert("A membership plan with this name already exists!");
+      return;
+    }
+
     try {
       await addDoc(collection(db, "memberships"), {
-        name: formData.name,
+        name: formData.name.trim(),
         price: Number(formData.price),
         duration: Number(formData.duration),
         description: formData.description,
@@ -135,9 +158,16 @@ function Memberships() {
 
     if (!isAdmin) return;
 
+    // Prevent duplicate plan names when editing
+    // Excludes the current plan so it can keep its own name
+    if (isDuplicatePlanName(editingPlan.id)) {
+      alert("A membership plan with this name already exists!");
+      return;
+    }
+
     try {
       await updateDoc(doc(db, "memberships", editingPlan.id), {
-        name: formData.name,
+        name: formData.name.trim(),
         price: Number(formData.price),
         duration: Number(formData.duration),
         description: formData.description,
@@ -186,6 +216,7 @@ function Memberships() {
       <div className="memberships-header">
         <div>
           <h1>Membership Plans</h1>
+
           <p>
             {isAdmin
               ? "Create and manage your gym membership plans."
@@ -355,7 +386,10 @@ function Memberships() {
                   Cancel
                 </button>
 
-                <button type="submit" className="save-btn">
+                <button
+                  type="submit"
+                  className="save-btn"
+                >
                   {editingPlan
                     ? "Update Plan"
                     : "Add Plan"}
